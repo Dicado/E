@@ -1,0 +1,57 @@
+.manager-panel {
+  max-width: 1000px;
+  margin: 80px auto;
+  padding: 40px;
+  background: #111;
+  border: 2px solid white;
+  font-family: 'Courier New', monospace;
+  color: white;
+}
+
+.manager-panel h2 {
+  font-size: 1.6rem;
+  margin-bottom: 25px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.chat-item {
+  border: 2px solid white;
+  padding: 20px;
+  background: #000;
+  transition: background 0.2s ease;
+}
+
+.chat-item:hover {
+  background: #1a1a1a;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.user-email {
+  color: #fff;
+}
+
+.chat-time {
+  color: #aaa;
+}
+
+.chat-preview {
+  color: #ccc;
+  font-size: 0.85rem;
+  font-style: italic;
+}

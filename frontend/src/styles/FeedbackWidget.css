@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Genos:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Genos', sans-serif;
+  color: #ccc;
+  overflow: hidden;
+}
+
+.terminal-ui {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  padding: 60px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.window-title {
+  background: #222;
+  padding: 4px 10px;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.window-title span {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.window-controls {
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.system-hint {
+  bottom: 28%;
+    left: 17%;
+  transform: translateX(-50%);
+  width: 460px;
+  background: #1c1c1c;
+  font-size: 0.95rem;
+}
+
+.system-message {
+  padding: 18px 16px;
+  padding-left: 40px;
+  z-index: 1;
+  font-size: 20px;
+  font-family: 'Genos', sans-serif;
+  color: #95FF60;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  background: #272728e1;
+  border-top: 1px solid #444;
+  height: 100%;
+}
+
+
+/* Form styles */
+.form-terminal {
+  position: relative;
+  z-index: 2;
+  width: 480px;
+  border: 2px solid #303031;
+  background: rgb(16 16 16 / 97%);
+  box-shadow: 6px 6px 0 rgba(255, 255, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-header {
+  background: #3E3C3C;
+  color: #B8B9BB;
+  padding: 10px;
+  border-bottom: 2px solid #444;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-body label {
+  font-size: 1.05rem;
+  color: #A3A5B3;
+}
+
+input,
+textarea {
+  background: #1d1d1d;
+  color: #eee;
+  border: 1px solid #555;
+  padding: 10px;
+  font-family: 'Genos', sans-serif;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+button {
+  margin-top: 20px;
+  background-color: #FF608D;
+  color: #1a1a1a;
+  font-weight: bold;
+  padding: 12px;
+  font-family: 'Genos', sans-serif;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid #DBD5D7;
+}
+
+button:hover {
+  background-color: rgb(16 16 16 0);
+  color: #95FF60;
+}
+
+.success-message,
+.error-message {
+  margin: 16px 24px;
+  margin-top: 0;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Genos', sans-serif;
+  border: 1px solid;
+  text-align: center;
+  box-shadow: 4px 4px 0 rgba(255, 255, 255, 0.1);
+  background: #141414;
+  letter-spacing: 0.05em;
+}
+
+.success-message {
+  color: #95FF60;
+  border-color: #95FF60;
+}
+
+.error-message {
+  color: #FF4B4B;
+  border-color: #FF4B4B;
+}
