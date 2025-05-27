@@ -11,10 +11,12 @@ function UploadButton({ onUpload }) {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/upload', formData, {
+      const response = await axios.post('/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      onUpload(response.data.url);
+      if (response.data?.url) {
+        onUpload(response.data.url);
+      }
     } catch (err) {
       console.error('Ошибка при загрузке файла:', err);
     }

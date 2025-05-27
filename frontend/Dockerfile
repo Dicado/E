@@ -1,8 +1,9 @@
 # frontend/Dockerfile
-FROM node:22-alpine@sha256:ad1aedbcc1b0575074a91ac146d6956476c1f9985994810e4ee02efd932a68fd
+FROM node:23-alpine@sha256:139be64e98a1374a1c49ee62b23a91f688a37a628422ff8bb9fba94185678ab3
 
 WORKDIR /app
 COPY package*.json ./
+RUN sed -i '/"proxy"/d' package.json
 RUN npm install --legacy-peer-deps
 COPY . .
 EXPOSE 3000

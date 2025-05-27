@@ -5,7 +5,10 @@ import axios from 'axios';
 import UploadButton from './UploadButton';
 import '../styles/ChatWidget.css';
 
-const socket = io('http://localhost:5000');
+const socket = io('/', {
+  path: '/socket.io',
+  transports: ['websocket'],
+});
 
 function ChatWidget() {
   const { chatId } = useParams();
@@ -23,7 +26,7 @@ function ChatWidget() {
 
     const loadChatHistory = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/chats/${chatId}`);
+        const res = await axios.get(`/api/chats/${chatId}`);
         setMessages(res.data.messages);
         setChatUserEmail(res.data.participants.user);
       } catch (err) {
@@ -79,54 +82,53 @@ function ChatWidget() {
 
   return (
     <div className="terminal-ui">
-  
-  <div className="form-terminal">
-    <div className="form-header">
-      C:/CHAT_SESSION.TXT
-      <img className="window-controls" src="/vibes/window_controls.png" alt="ctrl" />
-    </div>
-    <div className="form-body chat-body">
-      <div className="chat-messages">
-        {messages.map((msg, idx) => {
-          const isCurrentUser = msg.sender === userRole;
-          const align = isCurrentUser ? 'right' : 'left';
-          const label = msg.sender === 'manager' ? 'Менеджер' : chatUserEmail;
-          const isFile = msg.type === 'file' || msg.content?.startsWith('/uploads/');
-          return (
-            <div key={idx} className={`message-row ${align}`}>
-              <div className="sender-label">{label}</div>
-              <div className="message-bubble">
-                <div className="message-time">
-                  {new Date(msg.timestamp).toLocaleString('ru-RU')}
+      <div className="form-terminal">
+        <div className="form-header">
+          C:/CHAT_SESSION.TXT
+          <img className="window-controls" src="/vibes/window_controls.png" alt="ctrl" />
+        </div>
+        <div className="form-body chat-body">
+          <div className="chat-messages">
+            {messages.map((msg, idx) => {
+              const isCurrentUser = msg.senderType === userRole;
+              const align = isCurrentUser ? 'right' : 'left';
+              const label = msg.senderType === 'manager' ? 'Менеджер' : chatUserEmail;
+              const isFile = msg.type === 'file' || msg.content?.startsWith('/uploads/');
+              return (
+                <div key={idx} className={`message-row ${align}`}>
+                  <div className="sender-label">{label}</div>
+                  <div className="message-bubble">
+                    <div className="message-time">
+                      {new Date(msg.createdAt).toLocaleString('ru-RU')}
+                    </div>
+                    {isFile ? (
+                      <a href={msg.content} className="file-link" download target="_blank" rel="noreferrer">
+                        📎 Файл
+                      </a>
+                    ) : (
+                      <div className="message-text">{msg.content}</div>
+                    )}
+                  </div>
                 </div>
-                {isFile ? (
-                  <a href={msg.content} className="file-link" download target="_blank" rel="noreferrer">
-                    📎 Файл
-                  </a>
-                ) : (
-                  <div className="message-text">{msg.content}</div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
 
-      {!isChatClosed && (
-        <form className="chat-form" onSubmit={handleSendMessage}>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Введи сообщение..."
-          />
-          <button type="submit">ОТПРАВИТЬ</button>
-          <UploadButton onUpload={handleFileUpload} />
-        </form>
-      )}
+          {!isChatClosed && (
+            <form className="chat-form" onSubmit={handleSendMessage}>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Введи сообщение..."
+              />
+              <button type="submit">ОТПРАВИТЬ</button>
+              <UploadButton onUpload={handleFileUpload} />
+            </form>
+          )}
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   );
 }
 

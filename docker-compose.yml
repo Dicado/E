@@ -1,6 +1,20 @@
 services:
+  db:
+    image: mysql:8.0
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: VpG-NQa-Gv8-agt
+      MYSQL_DATABASE: widget_app
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Provoke%overpay6
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - widget-net
+
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
@@ -8,18 +22,32 @@ services:
     volumes:
       - ./backend/chats:/app/chats
       - ./backend/uploads:/app/uploads
+      - ./backend/logs:/app/logs
     env_file:
       - ./backend/.env
     restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - widget-net
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - widget-net
+
+volumes:
+  db_data:
+
+networks:
+  widget-net:
+    driver: bridge

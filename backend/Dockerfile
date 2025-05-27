@@ -1,7 +1,7 @@
-# backend/Dockerfile
-FROM node:22-alpine
+FROM node:lts-alpine
 WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
 COPY . .
-RUN npm install
 EXPOSE 5000
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

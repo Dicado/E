@@ -1,47 +1,64 @@
-const { ChatManager } = require('./chatStorage');
+const Chat = require('./models/Chat');
+const Message = require('./models/Message');
 
 function setupSocket(io) {
-  io.on('connection', (socket) => {
-    console.log('Новое подключение:', socket.id);
+    io.on('connection', (socket) => {
+        console.log('Новое подключение:', socket.id);
 
-    socket.on('joinChat', async ({ chatId, role, email }) => {
-      try {
-        const chat = await ChatManager.getChat(chatId);
-        
-        if (role === 'manager' && !chat.participants.manager) {
-          chat.participants.manager = email;
-          await ChatManager.updateChat(chat);
-        }
+        socket.on('joinChat', async ({ chatId, role, email }) => {
+            try {
+                const chat = await Chat.getChatById(chatId);
+                if (!chat) return socket.emit('error', 'Чат не найден');
 
-        socket.join(chatId);
-        socket.emit('chatHistory', chat.messages);
-      } catch (err) {
-        socket.emit('error', 'Чат не найден');
-      }
+                if (role === 'manager' && !chat.man3010ager_email) {
+                    await Chat.updateChatManager(chatId, email);
+                }
+
+                const messages = await Message.getMessagesByChatId(chatId);
+                socket.join(chatId);
+                socket.emit('chatHistory', messages);
+            } catch (err) {
+                console.error(err);
+                socket.emit('error', 'Ошибка при подключении к чату');
+            }
+        });
+
+        socket.on('sendMessage', async ({ chatId, message, role }) => {
+            try {
+                const msg = await Message.createMessage(chatId, role, message);
+                io.to(chatId).emit('newMessage', {
+                    chatId,
+                    sender: role,
+                    content: message,
+                    timestamp: new Date(),
+                    type: 'text'
+                });
+            } catch (err) {
+                console.error(err);
+                socket.emit('error', 'Ошибка отправки сообщения');
+            }
+        });
+
+        socket.on('uploadFile', async ({ chatId, fileUrl, role }) => {
+            try {
+                const msg = await Message.createMessage(chatId, role, fileUrl, 'file');
+                io.to(chatId).emit('newMessage', {
+                    chatId,
+                    sender: role,
+                    content: fileUrl,
+                    timestamp: new Date(),
+                    type: 'file'
+                });
+            } catch (err) {
+                console.error(err);
+                socket.emit('error', 'Ошибка при загрузке файла');
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Отключение сокета:', socket.id);
+        });
     });
-
-    socket.on('sendMessage', async ({ chatId, message, role }) => {
-      try {
-        const chat = await ChatManager.addMessage(chatId, message, role);
-        io.to(chatId).emit('newMessage', chat.messages.slice(-1)[0]);
-      } catch (err) {
-        socket.emit('error', 'Ошибка отправки сообщения');
-      }
-    });
-
-    socket.on('uploadFile', async ({ chatId, fileUrl, role }) => {
-      try {
-        const chat = await ChatManager.addMessage(chatId, fileUrl, role, true);
-        io.to(chatId).emit('newMessage', chat.messages.slice(-1)[0]);
-      } catch (err) {
-        socket.emit('error', 'Ошибка загрузки файла');
-      }
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Отключился:', socket.id);
-    });
-  });
 }
 
 module.exports = { setupSocket };
