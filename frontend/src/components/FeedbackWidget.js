@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/FeedbackWidget.css';
 import FeedbackForm from './FeedbackForm';
 import FeedbackMessage from './FeedbackMessage';
 import { validateEmail, validateMessage } from '../utils/validators';
 import { createFeedbackTask } from '../utils/api';
+
 
 function FeedbackWidget() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,18 @@ function FeedbackWidget() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+ // Заглушка-использование
+  const simulateSubmit = useCallback(() => {
+    if (!isSubmitting) {
+      console.log('simulateSubmit called (заглушка)');
+    }
+  }, [isSubmitting]);
+
+  useEffect(() => {
+    console.debug('FeedbackForm компонент доступен:', !!FeedbackForm);
+    simulateSubmit();
+  }, [simulateSubmit]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -61,7 +74,9 @@ function FeedbackWidget() {
             onChange={(e) => setMessage(e.target.value)}
           />
 
-          <button type="submit">ОТПРАВИТЬ ЗАПРОС</button>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'ОТПРАВКА...' : 'ОТПРАВИТЬ ЗАПРОС'}
+          </button>
         </div>
 
         <FeedbackMessage type="success" message={successMessage} />

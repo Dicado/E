@@ -7,7 +7,7 @@ const Message = sequelize.define('Message', {
     allowNull: false
   },
   senderType: {
-    type: DataTypes.ENUM('user', 'manager'),
+    type: DataTypes.ENUM('user', 'manager', 'system'),
     allowNull: false
   },
   content: {
@@ -19,7 +19,19 @@ const Message = sequelize.define('Message', {
     defaultValue: 'text'
   }
 }, {
+  tableName: 'Messages',
   timestamps: true
 });
+
+Message.getMessagesByChatId = async function (chatId) {
+  return await Message.findAll({
+    where: { chatId },
+    order: [['createdAt', 'ASC']]
+  });
+};
+
+Message.createMessage = async function (chatId, senderType, content, type = 'text') {
+  return await Message.create({ chatId, senderType, content, type });
+};
 
 module.exports = Message;

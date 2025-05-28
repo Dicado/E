@@ -1,8 +1,11 @@
+version: '3.8'
+
 services:
   db:
     image: mysql:8.0
+    container_name: widget-app-db
     ports:
-      - "3308:3306"
+      - "3308:3306" # Хостовый порт -> Контейнерный MySQL порт
     environment:
       MYSQL_ROOT_PASSWORD: VpG-NQa-Gv8-agt
       MYSQL_DATABASE: widget_app
@@ -10,10 +13,12 @@ services:
       MYSQL_PASSWORD: Provoke%overpay6
     volumes:
       - db_data:/var/lib/mysql
+    restart: unless-stopped
     networks:
       - widget-net
 
   backend:
+    container_name: widget-app-backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -25,13 +30,14 @@ services:
       - ./backend/logs:/app/logs
     env_file:
       - ./backend/.env
-    restart: unless-stopped
     depends_on:
       - db
+    restart: unless-stopped
     networks:
       - widget-net
 
   frontend:
+    container_name: widget-app-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile

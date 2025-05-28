@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 import axios from 'axios';
 import UploadButton from './UploadButton';
 import '../styles/ChatWidget.css';
 
-const socket = io('/', {
-  path: '/socket.io',
-  transports: ['websocket'],
-});
-
 function ChatWidget() {
   const { chatId } = useParams();
   const location = useLocation();
+
   const [messages, setMessages] = useState([]);
   const [chatUserEmail, setChatUserEmail] = useState('');
   const [input, setInput] = useState('');
@@ -24,51 +20,60 @@ function ChatWidget() {
     const role = queryParams.get('role') || 'user';
     setUserRole(role);
 
-    const loadChatHistory = async () => {
-      try {
-        const res = await axios.get(`/api/chats/${chatId}`);
-        setMessages(res.data.messages);
-        setChatUserEmail(res.data.participants.user);
-      } catch (err) {
-        console.error('Ошибка загрузки истории чата:', err);
-      }
-    };
+    const email = sessionStorage.getItem('userEmail') || 'Guest';
 
     socket.emit('joinChat', {
       chatId,
       role,
-      email: sessionStorage.getItem('userEmail') || 'Guest',
+      email,
     });
 
     socket.on('chatHistory', (history) => {
-      setMessages(history);
+      const filtered = history.filter(msg => msg.senderType !== 'system');
+      setMessages(filtered);
     });
 
     socket.on('newMessage', (message) => {
-      setMessages((prev) => [...prev, message]);
+      if (message.senderType !== 'system') {
+        setMessages((prev) => [...prev, message]);
+      }
     });
 
     socket.on('chatClosed', () => {
       setIsChatClosed(true);
     });
 
-    loadChatHistory();
-
     return () => {
-      socket.off('newMessage');
       socket.off('chatHistory');
+      socket.off('newMessage');
       socket.off('chatClosed');
     };
   }, [chatId, location.search]);
 
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/chats/${chatId}`);
+        const filtered = res.data.messages.filter(msg => msg.senderType !== 'system');
+        setMessages(filtered);
+        setChatUserEmail(res.data.participants.user);
+      } catch (err) {
+        console.error('Ошибка загрузки чата:', err);
+      }
+    };
+    loadChatHistory();
+  }, [chatId]);
+
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
+
     socket.emit('sendMessage', {
       chatId,
       message: input,
       role: userRole,
     });
+
     setInput('');
   };
 
@@ -80,6 +85,8 @@ function ChatWidget() {
     });
   };
 
+  const filteredMessages = messages.filter(msg => msg.senderType !== 'system');
+
   return (
     <div className="terminal-ui">
       <div className="form-terminal">
@@ -89,11 +96,13 @@ function ChatWidget() {
         </div>
         <div className="form-body chat-body">
           <div className="chat-messages">
-            {messages.map((msg, idx) => {
+            {filteredMessages.map((msg, idx) => {
+               console.log(msg); 
               const isCurrentUser = msg.senderType === userRole;
               const align = isCurrentUser ? 'right' : 'left';
               const label = msg.senderType === 'manager' ? 'Менеджер' : chatUserEmail;
               const isFile = msg.type === 'file' || msg.content?.startsWith('/uploads/');
+
               return (
                 <div key={idx} className={`message-row ${align}`}>
                   <div className="sender-label">{label}</div>
