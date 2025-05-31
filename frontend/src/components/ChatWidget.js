@@ -22,11 +22,7 @@ function ChatWidget() {
 
     const email = sessionStorage.getItem('userEmail') || 'Guest';
 
-    socket.emit('joinChat', {
-      chatId,
-      role,
-      email,
-    });
+    socket.emit('joinChat', { chatId, role, email });
 
     socket.on('chatHistory', (history) => {
       const filtered = history.filter(msg => msg.senderType !== 'system');
@@ -67,22 +63,12 @@ function ChatWidget() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-
-    socket.emit('sendMessage', {
-      chatId,
-      message: input,
-      role: userRole,
-    });
-
+    socket.emit('sendMessage', { chatId, message: input, role: userRole });
     setInput('');
   };
 
   const handleFileUpload = (url) => {
-    socket.emit('uploadFile', {
-      chatId,
-      fileUrl: url,
-      role: userRole,
-    });
+    socket.emit('uploadFile', { chatId, fileUrl: url, role: userRole });
   };
 
   const filteredMessages = messages.filter(msg => msg.senderType !== 'system');
@@ -97,7 +83,7 @@ function ChatWidget() {
         <div className="form-body chat-body">
           <div className="chat-messages">
             {filteredMessages.map((msg, idx) => {
-               console.log(msg); 
+              console.log(msg);
               const isCurrentUser = msg.senderType === userRole;
               const align = isCurrentUser ? 'right' : 'left';
               const label = msg.senderType === 'manager' ? 'Менеджер' : chatUserEmail;
@@ -111,9 +97,16 @@ function ChatWidget() {
                       {new Date(msg.createdAt).toLocaleString('ru-RU')}
                     </div>
                     {isFile ? (
-                      <a href={msg.content} className="file-link" download target="_blank" rel="noreferrer">
-                        📎 Файл
+                      <a
+                        href={msg.content}
+                        className="file-link"
+                        download={msg.content.split('/').pop()} // включает оригинальное имя
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        📎 {msg.content.split('-').slice(1).join('-')}
                       </a>
+
                     ) : (
                       <div className="message-text">{msg.content}</div>
                     )}

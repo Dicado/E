@@ -16,12 +16,12 @@ module.exports = (io) => {
 
         const messages = await Message.findAll({
           where: { chatId },
-          order: [['createdAt', 'ASC']]
+          order: [['createdAt', 'ASC']],
         });
 
         socket.emit('chatHistory', messages);
       } catch (err) {
-        console.error('Ошибка joinChat:', err);
+        console.error('[joinChat Error]', err);
         socket.emit('error', 'Не удалось подключиться к чату');
       }
     });
@@ -32,29 +32,33 @@ module.exports = (io) => {
           chatId,
           senderType: role,
           content: message,
-          type: 'text'
+          type: 'text',
         });
 
         io.to(chatId).emit('newMessage', msg);
       } catch (err) {
-        console.error('Ошибка sendMessage:', err);
+        console.error('[sendMessage Error]', err);
         socket.emit('error', 'Не удалось отправить сообщение');
-        console.log('[SOCKET] Получено сообщение:', data);
       }
     });
 
     socket.on('uploadFile', async ({ chatId, fileUrl, role }) => {
       try {
+        if (!fileUrl || !chatId || !role) {
+          socket.emit('error', 'Некорректные данные для загрузки файла');
+          return;
+        }
+
         const msg = await Message.create({
           chatId,
           senderType: role,
           content: fileUrl,
-          type: 'file'
+          type: 'file',
         });
 
         io.to(chatId).emit('newMessage', msg);
       } catch (err) {
-        console.error('Ошибка uploadFile:', err);
+        console.error('[uploadFile Error]', err);
         socket.emit('error', 'Не удалось загрузить файл');
       }
     });
